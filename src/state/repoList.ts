@@ -1,39 +1,63 @@
-import { createSlice } from '@reduxjs/toolkit';
+import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
+import axios from 'axios';
 
-interface RepoState {
-  loading: boolean;
-  error: string | null;
-  data: string[];
+export const fetchRepo = createAsyncThunk(
+  'repoList/fetchRepo',
+  async (term: string) => {
+    const response = await axios.get('https://registry.npmjs.org/-/v1/search', {
+      params: {
+        text: term
+      }
+    })
+    .then((response) => response.data)
+    .catch((error) => error);
+    return response.data;
+  }
+)
+
+interface RepoListState {
+  repoList: {
+    loading: 'idle' | 'pending';
+    data: string[];
+    error: string | null;
+  },
 };
 
-const initialState: RepoState = {
-  data: [],
-  error: null,
-  loading: false
+const repoListInitialState: RepoListState = {
+  repoList: {
+    data: [],
+    loading: 'idle',
+    error: null,
+  },
 };
 
 export const repoListSlice = createSlice({
   name: 'repoList',
-  initialState,
-  reducers: {
-    searchRepo: (state) => {
-      state.loading = true;
-      state.error = null;
-      state.data = [];
+  initialState: repoListInitialState,
+  reducers: {},
+  extraReducers: {
+    [fetchRepo.pending.type]: (state, action) => {
+      state.repoList = {
+        loading: 'pending',
+        data: [],
+        error: null
+      };
     },
-    searchRepoSuccess: (state, action) => {
-      state.loading = false;
-      state.error = null;
-      state.data = action.payload;
+    [fetchRepo.fulfilled.type]: (state, action) => {
+      state.repoList = {
+        loading: 'idle',
+        data: action.payload,
+        error: null
+      };
     },
-    searchRepoError: (state, action) => {
-      state.loading = false;
-      state.error = action.payload;
-      state.data = [];
-    }
-  }
+    [fetchRepo.rejected.type]: (state, action) => {
+      state.repoList = {
+        loading: 'idle',
+        data: [],
+        error: action.payload
+      };
+    },
+  },
 });
-
-export const { searchRepo, searchRepoSuccess, searchRepoError } = repoListSlice.actions;
 
 export default repoListSlice.reducer;
