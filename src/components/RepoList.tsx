@@ -1,11 +1,13 @@
 import React, { useState } from 'react';
-import { useDispatch, useSelector } from 'react-redux';
-import { fetchRepo } from '../state/repoList';
+import { useDispatch, useSelector, TypedUseSelectorHook } from 'react-redux';
+import { fetchRepo, RootState } from '../state/repoList';
+
+const useTypedSelector: TypedUseSelectorHook<RootState> = useSelector;
 
 const RepoList: React.FC = (props) => {
   const [term, setTerm] = useState('');
   const dispatch = useDispatch();
-  const repoList = useSelector(state => state);
+  const repoList = useTypedSelector((state) => state);
   console.log(repoList);
   const handleChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     setTerm(event.target.value);

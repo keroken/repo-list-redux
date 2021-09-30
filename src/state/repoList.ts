@@ -3,15 +3,14 @@ import axios from 'axios';
 
 export const fetchRepo = createAsyncThunk(
   'repoList/fetchRepo',
-  async (term: string) => {
+  async (term: string, thunkAPI) => {
     const response = await axios.get('https://registry.npmjs.org/-/v1/search', {
       params: {
         text: term
       }
     })
-    .then((response) => response.data)
-    .catch((error) => error);
-    return response.data;
+    console.log(response.data.objects);
+    return response.data.objects;
   }
 )
 
@@ -61,3 +60,4 @@ export const repoListSlice = createSlice({
 });
 
 export default repoListSlice.reducer;
+export type RootState = ReturnType<typeof repoListSlice.reducer>;
