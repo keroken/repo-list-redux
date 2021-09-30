@@ -2,15 +2,17 @@ import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
 import axios from 'axios';
 
 export const fetchRepo = createAsyncThunk(
-  'repoList/fetchRepo',
+  'repoList',
   async (term: string, thunkAPI) => {
-    const response = await axios.get('https://registry.npmjs.org/-/v1/search', {
+    const { data } = await axios.get('https://registry.npmjs.org/-/v1/search', {
       params: {
         text: term
       }
     })
-    console.log(response.data.objects);
-    return response.data.objects;
+    const names = data.objects.map((results: any) => {
+      return results.package.name;
+    })
+    return names;
   }
 )
 
