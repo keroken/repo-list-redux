@@ -10,7 +10,7 @@ interface RepoListState {
 };
 
 export const fetchRepo = createAsyncThunk(
-  'repoList/fetch',
+  'repoList/fetchRepo',
   async (term: string, thunkAPI) => {
     const { data } = await axios.get('https://registry.npmjs.org/-/v1/search', {
       params: {
