@@ -2,34 +2,38 @@ import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
 import axios from 'axios';
 
 interface RepoListState {
-  repoList: {
-    loading: 'idle' | 'pending';
-    data: string[];
-    error: string | null;
-  },
+  loading: 'idle' | 'pending';
+  data: { name: string, link: string }[];
+  error: string | null;
 };
 
 export const fetchRepo = createAsyncThunk(
   'repoList/fetchRepo',
-  async (term: string, thunkAPI) => {
-    const { data } = await axios.get('https://registry.npmjs.org/-/v1/search', {
-      params: {
-        text: term
-      }
-    })
-    const names = data.objects.map((results: any) => {
-      return results.package.name;
-    })
-    return names;
+  async (term: string, { rejectWithValue }) => {
+    try {
+      const { data } = await axios.get('https://registry.npmjs.org/-/v1/search', {
+        params: {
+          text: term
+        }
+      })
+      console.log(data);
+      const names = data.objects.map((results: any) => {
+        return ({
+          name: results.package.name,
+          link: results.package.links.homepage,
+        });
+      })
+      return names;
+    } catch (err) {
+      return rejectWithValue(err);
+    }
   }
 )
 
 const repoListInitialState: RepoListState = {
-  repoList: {
-    data: [],
-    loading: 'idle',
-    error: null,
-  },
+  data: [],
+  loading: 'idle',
+  error: null,
 };
 
 export const repoListSlice = createSlice({
@@ -38,28 +42,22 @@ export const repoListSlice = createSlice({
   reducers: {},
   extraReducers: (builder) => {
     builder.addCase(fetchRepo.pending, (state, action) => {
-      state.repoList = {
-        loading: 'pending',
-        data: [],
-        error: null
-      };
+      state.loading = 'pending';
+      state.data = [];
+      state.error = null;
     });
     builder.addCase(fetchRepo.fulfilled, (state, action) => {
-      state.repoList = {
-        loading: 'idle',
-        data: action.payload,
-        error: null
-      };
+      state.loading = 'idle';
+      state.data = action.payload;
+      state.error = null;
     });
     builder.addCase(fetchRepo.rejected, (state, action) => {
-      state.repoList = {
-        loading: 'idle',
-        data: [],
-        error: 'error'
-      };
+      state.loading = 'idle';
+      state.data = [];
+      state.error = 'error';
     });
   },
 });
 
-export default repoListSlice.reducer;
+export default repoListSlice;
 export type RootState = ReturnType<typeof repoListSlice.reducer>;
