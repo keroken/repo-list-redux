@@ -1,8 +1,8 @@
 import { configureStore } from '@reduxjs/toolkit';
-import repoListReducer from './repoList';
+import repoListSlice from './repoList';
 
-export default configureStore({
-  reducer: {
-    repoList: repoListReducer
-  },
+export const store = configureStore({
+  reducer: repoListSlice.reducer,
 });
+
+export type AppDispatch = typeof store.dispatch;
